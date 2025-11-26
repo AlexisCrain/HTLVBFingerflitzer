@@ -26,13 +26,16 @@ az webapp create `
    --role contributor `
    --scopes /subscriptions/$SubscriptionId/resourceGroups/rg-fingerflitzer/providers/Microsoft.Web/sites/wa-fingerflitzer-$UserName `
    --json-auth
-
-   $ServicePrincipal = az ad sp list --display-name "gh-action-to-deploy-fingerflitzer-webapp-$UserName" | ConvertFrom-Json
    
    gh auth login
    gh secret set AZURE_CREDENTIALS `
    --repo alexiscrain/HTLVBFingerflitzer `
    --body "$ServicePrincipalSecret"
+
+   az webapp deployment slot create `
+   --slot staging `
+   --name wa-fingerflitzer-$UserName `
+   --resource-group rg-fingerflitzer
 
 # # Allow access from web app to database
 # # see https://learn.microsoft.com/en-us/azure/app-service/tutorial-connect-msi-azure-database
@@ -64,5 +67,6 @@ Write-Host "### Web app: $($WebApp.defaultHostName)"
 
 <#
 az group delete --name rg-fingerflitzer --no-wait
+$ServicePrincipal = az ad sp list --display-name "gh-action-to-deploy-fingerflitzer-webapp-$UserName" | ConvertFrom-Json
 az ad sp delete --id $ServicePrincipal.id
 #>
