@@ -17,14 +17,22 @@ az webapp create `
   --public-network-access Enabled `
   --plan asp-fingerflitzer `
   --resource-group rg-fingerflitzer | Out-Null
+ 
 
   $SubscriptionId = (az account show | ConvertFrom-Json).id
-
-  az ad sp create-for-rbac `
-   --name "gh-action-to-deploy-fingerflitzer-webapp"`
+  ## name muss innerhalt der Organisation eindeutig sein
+  $ServicePrincipalSecret = az ad sp create-for-rbac `
+   --name "gh-action-to-deploy-fingerflitzer-webapp-$UserName"`
    --role contributor `
    --scopes /subscriptions/$SubscriptionId/resourceGroups/rg-fingerflitzer/providers/Microsoft.Web/sites/wa-fingerflitzer-$UserName `
    --json-auth
+
+   $ServicePrincipal = az ad sp list --display-name "gh-action-to-deploy-fingerflitzer-webapp-$UserName" | ConvertFrom-Json
+   
+   gh auth login
+   gh secret set AZURE_CREDENTIALS `
+   --repo alexiscrain/HTLVBFingerflitzer `
+   --body "$ServicePrincipalSecret"
 
 # # Allow access from web app to database
 # # see https://learn.microsoft.com/en-us/azure/app-service/tutorial-connect-msi-azure-database
@@ -49,6 +57,12 @@ az webapp create `
 #   --admin-password $AccessToken.accessToken `
 #   --name db-beer4me-$UserName
 
+$WebApp = az webapp show `
+  --name wa-fingerflitzer-$UserName `
+  --resource-group rg-fingerflitzer | ConvertFrom-Json
+Write-Host "### Web app: $($WebApp.defaultHostName)"
+
 <#
 az group delete --name rg-fingerflitzer --no-wait
+az ad sp delete --id $ServicePrincipal.id
 #>
