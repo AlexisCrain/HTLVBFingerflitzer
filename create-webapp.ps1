@@ -49,11 +49,6 @@ az webapp create `
 #   --admin-password $AccessToken.accessToken `
 #   --name db-beer4me-$UserName
 
-$WebApp = az webapp show `
-  --name wa-fingerflitzer-$UserName `
-  --resource-group rg-fingerflitzer | ConvertFrom-Json
-Write-Host "### Web app: $($WebApp.defaultHostName)"
-
 <#
 az group delete --name rg-fingerflitzer --no-wait
 #>
