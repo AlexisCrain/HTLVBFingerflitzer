@@ -37,6 +37,12 @@ az webapp create `
    --name wa-fingerflitzer-$UserName `
    --resource-group rg-fingerflitzer
 
+   az webapp config appsettings set `
+   --settings "DailyChallenge__Type=static-text" "DailyChallenge__StaticText=Hi from Azure Web App!" `
+   --slot staging `
+   --name wa-fingerflitzer-$UserName `
+   --resource-group rg-fingerflitzer
+
 # # Allow access from web app to database
 # # see https://learn.microsoft.com/en-us/azure/app-service/tutorial-connect-msi-azure-database
 # az extension add --name serviceconnector-passwordless --upgrade
