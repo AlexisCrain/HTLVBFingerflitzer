@@ -1,4 +1,5 @@
 $UserName = ((az ad signed-in-user show | ConvertFrom-Json).userPrincipalName -replace '@.*$','' -replace '\W','').ToLower()
+$GitHubRepositoryName = "alexiscrain/HTLVBFingerflitzer"
 
 az group create --name rg-fingerflitzer --location swedencentral | Out-Null
 
@@ -29,7 +30,7 @@ az webapp create `
    
   gh auth login
   $ServicePrincipalSecret | get secret set AZURE_CREDENTIALS `
-  --repo alexiscrain/HTLVBFingerflitzer 
+  --repo $GitHubRepositoryName 
 
 #   gh secret set AZURE_CREDENTIALS `
 #   --repo alexiscrain/HTLVBFingerflitzer `
@@ -47,7 +48,7 @@ az webapp create `
    --resource-group rg-fingerflitzer
 
    gh workflow run publish-fingerflitzer-web-app.yml `
-   --repo alexiscrain/HTLVBFingerflitzer 
+   --repo $GitHubRepositoryName 
 
 
 # # Allow access from web app to database
@@ -77,6 +78,13 @@ $WebApp = az webapp show `
   --name wa-fingerflitzer-$UserName `
   --resource-group rg-fingerflitzer | ConvertFrom-Json
 Write-Host "### Web app: $($WebApp.defaultHostName)"
+
+$WebAppStagingSlot = az webapp deployment slot show `
+--resource-group rg-fingerflitzer `
+--name wa-fingerflitzer-$UserName `
+--slot staging `
+Write-Host "### Web app: $($WebAppStagingSlot.defaultHostName)"
+
 
 <#
 az group delete --name rg-fingerflitzer --no-wait

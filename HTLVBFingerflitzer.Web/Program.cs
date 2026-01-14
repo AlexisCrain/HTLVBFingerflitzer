@@ -1,6 +1,10 @@
 using HTLVBFingerflitzer.Web.Components;
+using Microsoft.Identity.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration);
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
